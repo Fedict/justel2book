@@ -27,6 +27,8 @@ package be.fedict.justel2book;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.util.Properties;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -34,9 +36,6 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.apache.commons.configuration2.PropertiesConfiguration;
-import org.apache.commons.configuration2.builder.fluent.Configurations;
-import org.apache.commons.configuration2.ex.ConfigurationException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,10 +46,11 @@ import org.slf4j.LoggerFactory;
  * @author Bart Hanssens
  */
 public class Main {
-		private final static Logger LOG = LoggerFactory.getLogger(Main.class);
+	private final static Logger LOG = LoggerFactory.getLogger(Main.class);
 	
 	private final static Options OPTS = new Options()
-			.addRequiredOption("f", "config file", true, "config file")
+			.addOption("f", "file", true, "use local file")
+			.addRequiredOption("c", "config", true, "config file")
 			.addRequiredOption("o", "outdir", true, "output dir");
 
 	/**
@@ -89,9 +89,9 @@ public class Main {
 			System.exit(-1);
 		}
 
-		File file = new File(cli.getOptionValue("f"));
-		if (! (file.exists() && file.isFile() && file.canRead())) {
-			LOG.error("Cannot read config file {}", file);
+		File cfg = new File(cli.getOptionValue("c"));
+		if (! (cfg.exists() && cfg.isFile() && cfg.canRead())) {
+			LOG.error("Cannot read config file {}", cfg);
 			System.exit(-2);
 		}
 		
@@ -101,19 +101,32 @@ public class Main {
 			System.exit(-3);
 		} 
 		
-		Configurations cfg = new Configurations();
-		PropertiesConfiguration props = null;
+		Properties props = new Properties();
 		try {
-			props = cfg.properties(file.getPath());
-		} catch (ConfigurationException ex) {
+			props.load(Files.newInputStream(cfg.toPath()));
+		} catch (IOException ex) {
 			LOG.error("Loading config file failed", ex.getMessage());
 			System.exit(-4);
 		}
 
-		Converter conv = new Converter();
+		File f = cli.hasOption("f") ? new File(cli.getOptionValue("f")) : null;
+		if (f != null) {
+			if (! (f.exists() && f.isFile() && f.canRead())) {
+				LOG.error("Cannot read input file {}", f);
+				System.exit(-5);
+			}
+		}
+
+		Converter conv = new Converter();		
 		try {
-			conv.fetch(props.getString("justel2book.url"), 
-					props.getString("justel2book.proxy.host"), props.getInt("justel2book.proxy.port"));
+			if (f == null) {
+				conv.fetch(props.getProperty("justel2book.url"), 
+							props.getProperty("justel2book.proxy.host"), 
+							Integer.getInteger(props.getProperty("justel2book.proxy.port"), 0));
+				conv.save(new File(dir, "out.html"));
+			} else {
+				conv.fetch(f);
+			}
 		} catch (IOException ioe) {
 			LOG.error("Could not download HTML page", ioe.getMessage());
 		}

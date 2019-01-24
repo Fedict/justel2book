@@ -25,13 +25,19 @@
  */
 package be.fedict.justel2book;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Get an HTML page and clean it
@@ -39,22 +45,46 @@ import org.jsoup.nodes.Element;
  * @author Bart Hanssens
  */
 public class Converter {
+	private final static Logger LOG = LoggerFactory.getLogger(Converter.class);
+	
 	private Document doc;
 	
 	/**
-	 * Get an HTML page (direct or via proxy) and fix incorrect markup.
-	 * Time out after 30 seconds
+	 * Get an HTML page (direct or via proxy) and fix incorrect markup. Time out after 30 seconds
 	 * 
 	 * @param url
 	 * @param proxyHost proxy host or empty for no proxy
 	 * @param proxyPort proxy port or zero
+	 * @throws IOException
 	 */
 	public void fetch(String url, String proxyHost, int proxyPort) throws IOException {
 		Proxy proxy = (proxyHost == null || proxyHost.isEmpty())
 							? Proxy.NO_PROXY 
 							: new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort));
+		LOG.info("Getting {}", url);
 		doc = Jsoup.connect(url).proxy(proxy).timeout(30_000).userAgent("Justel2eBook").get();
 	}
 	
+	/**
+	 * Load an HTML page from a local file and fix incorrect markup.
+	 * 
+	 * @param f
+	 * @throws IOException 
+	 */
+	public void fetch(File f) throws IOException {
+		LOG.info("Loading {}", f);
+		doc = Jsoup.parse(f, StandardCharsets.ISO_8859_1.name());
+	}
 	
+	public void save(File f) throws IOException {
+		LOG.info("Saving doc to {}", f);
+		Files.write(f.toPath(), 
+					doc.outerHtml().getBytes(StandardCharsets.ISO_8859_1), 
+					StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE);
+	}
+	
+	public BookMeta getMeta() {
+		doc.body().select("table:first-child td[colspan=5]");
+		return new BookMeta();
+	}
 }
