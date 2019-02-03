@@ -21,7 +21,7 @@
               <transformers>
                 <transformer>
                   <manifestEntries>
-                    <Main-Class>${app.main.class}</Main-Class>
+                    <Main-Class>be.fedict.justel2book.Main</Main-Class>
                     <X-Compile-Source-JDK>${maven.compile.source}</X-Compile-Source-JDK>
                     <X-Compile-Target-JDK>${maven.compile.target}</X-Compile-Target-JDK>
                   </manifestEntries>

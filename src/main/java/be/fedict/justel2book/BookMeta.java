@@ -27,8 +27,6 @@ package be.fedict.justel2book;
 
 import java.net.URL;
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  *
@@ -44,4 +42,76 @@ public class BookMeta {
 	private LocalDate pubPage;
 	private LocalDate fromDate;
 	private URL eli;
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public String getLanguage() {
+		return language;
+	}
+
+	public void setLanguage(String language) {
+		this.language = language;
+	}
+
+	public LocalDate getGenDate() {
+		return genDate;
+	}
+
+	public void setGenDate(LocalDate genDate) {
+		this.genDate = genDate;
+	}
+
+	public LocalDate getPubDate() {
+		return pubDate;
+	}
+
+	public void setPubDate(LocalDate pubDate) {
+		this.pubDate = pubDate;
+	}
+
+	public LocalDate getPubNumber() {
+		return pubNumber;
+	}
+
+	public void setPubNumber(LocalDate pubNumber) {
+		this.pubNumber = pubNumber;
+	}
+
+	public LocalDate getPubPage() {
+		return pubPage;
+	}
+
+	public void setPubPage(LocalDate pubPage) {
+		this.pubPage = pubPage;
+	}
+
+	public LocalDate getFromDate() {
+		return fromDate;
+	}
+
+	public void setFromDate(LocalDate fromDate) {
+		this.fromDate = fromDate;
+	}
+
+	public URL getEli() {
+		return eli;
+	}
+
+	public void setEli(URL eli) {
+		this.eli = eli;
+	}
 }

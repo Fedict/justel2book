@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>be.fedict</groupId>
 	<artifactId>justel2book</artifactId>
-	<version>2.5-SNAPSHOT</version>
+	<version>1.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -23,10 +23,15 @@
 			<artifactId>slf4j-simple</artifactId>
 			<version>1.7.25</version>
 		</dependency>
+		<dependency>
+			<groupId>org.jsoup</groupId>
+			<artifactId>jsoup</artifactId>
+			<version>1.11.3</version>
+		</dependency>
 	 <dependency>
-	  <groupId>org.jsoup</groupId>
-	  <artifactId>jsoup</artifactId>
-	  <version>1.11.3</version>
+	  <groupId>org.freemarker</groupId>
+	  <artifactId>freemarker</artifactId>
+	  <version>2.3.28</version>
 	 </dependency>
 	</dependencies>
 	<build>
@@ -42,10 +47,11 @@
 						</goals>
 						<configuration>
 							<transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+							<transformer implementation="org.apache.maven.plugins.shade.resource.ApacheLicenseResourceTransformer"/>
 							<transformers>
 								<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
 									<manifestEntries>
-										<Main-Class>${app.main.class}</Main-Class>
+										<Main-Class>be.fedict.justel2book.Main</Main-Class>
 										<X-Compile-Source-JDK>${maven.compile.source}</X-Compile-Source-JDK>
 										<X-Compile-Target-JDK>${maven.compile.target}</X-Compile-Target-JDK>
 									</manifestEntries>

@@ -23,18 +23,26 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package be.fedict.justel2book.Justel;
+package be.fedict.justel2book;
 
-import java.util.regex.Pattern;
+import java.io.File;
 
 /**
- *
+ * Generic interface for writing ebook
+ * 
  * @author Bart.Hanssens
  */
-public class JustelArticle extends AbstractJustel { 
-	private final static Pattern nl = Pattern.compile("(.)");
+public interface BookWriter {
+	/**
+	 * 
+	 * @param file
+	 */
+	public void startBook(File file, BookMeta meta);
 	
-	public JustelArticle(String seq) {
-		super(99, "", seq);
-	}
+	public void writeCover();
+	public void writePreface();
+	public void writeTOC();
+	public void writeContent();
+	
+	public void finishBook();
 }
