@@ -27,43 +27,85 @@ package be.fedict.justel2book.epub3;
 
 import be.fedict.justel2book.BookMeta;
 import be.fedict.justel2book.BookWriter;
-import java.io.File;
+import java.io.FileOutputStream;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.logging.Level;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipOutputStream;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author Bart Hanssens
  */
 public class Epub3Writer implements BookWriter {
-	private File file;
+	private final static Logger LOG = LoggerFactory.getLogger(Epub3Writer.class);
+	
+	private final static String PREFIX = "/be/fedict/justel2book/epub3";
+	private ClassLoader cld;
+	
+	private Path tempDir;
+	private Path file;
 
 	@Override
-	public void startBook(File file, BookMeta meta) {
+	public void startBook(Path file, BookMeta meta) throws Exception {
 		this.file = file;
+		this.cld = this.getClass().getClassLoader();
+		tempDir = Files.createTempDirectory("epub");
 	}
 
 	@Override
 	public void writeCover() {
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+		//
 	}
 
 	@Override
 	public void writePreface() {
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+		//
 	}
 
 	@Override
 	public void writeTOC() {
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+		//
 	}
 
 	@Override
 	public void writeContent() {
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+		//	
 	}
 
 	@Override
-	public void finishBook() {
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	public void endBook() {
+		try (	FileOutputStream fos = new FileOutputStream(file.toFile());
+				ZipOutputStream zip = new ZipOutputStream(fos)) {
+			
+			ZipEntry zeMime = new ZipEntry("mime-type");
+			zip.putNextEntry(zeMime);
+			cld.getResourceAsStream(PREFIX + "/mime-type");
+			zip.closeEntry();
+			
+			
+		} catch (IOException ex) {
+			LOG.error("Could not write eBook", ex);
+		}
+		cleanup();
 	}
-	
+
+	private void cleanup() {
+		if (tempDir != null) {
+			try {
+				Files.walk(tempDir).forEach(f -> f.toFile().delete());
+				Files.delete(tempDir);
+			} catch (IOException ioe) {
+				LOG.error("Could not delete (part of) temp dir", ioe);
+			}
+		}
+	}
+
 }

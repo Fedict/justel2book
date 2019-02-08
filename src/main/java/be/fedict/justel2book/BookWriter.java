@@ -26,6 +26,7 @@
 package be.fedict.justel2book;
 
 import java.io.File;
+import java.nio.file.Path;
 
 /**
  * Generic interface for writing ebook
@@ -37,12 +38,12 @@ public interface BookWriter {
 	 * 
 	 * @param file
 	 */
-	public void startBook(File file, BookMeta meta);
+	public void startBook(Path file, BookMeta meta) throws Exception;
 	
 	public void writeCover();
 	public void writePreface();
 	public void writeTOC();
 	public void writeContent();
 	
-	public void finishBook();
+	public void endBook() throws Exception;
 }
