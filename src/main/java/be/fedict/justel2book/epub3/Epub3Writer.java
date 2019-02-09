@@ -27,14 +27,20 @@ package be.fedict.justel2book.epub3;
 
 import be.fedict.justel2book.BookMeta;
 import be.fedict.justel2book.BookWriter;
-import java.io.FileOutputStream;
 
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
+
+import java.io.BufferedWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.logging.Level;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
 import org.slf4j.Logger;
@@ -48,21 +54,47 @@ public class Epub3Writer implements BookWriter {
 	private final static Logger LOG = LoggerFactory.getLogger(Epub3Writer.class);
 	
 	private final static String PREFIX = "/be/fedict/justel2book/epub3";
-	private ClassLoader cld;
+	private final ClassLoader cld;
+	private final Configuration fm = new Configuration(Configuration.VERSION_2_3_28);
 	
 	private Path tempDir;
+	private Path tempDirOEBPS;
+	
 	private Path file;
-
-	@Override
-	public void startBook(Path file, BookMeta meta) throws Exception {
-		this.file = file;
+	private BookMeta meta;
+	
+	public Epub3Writer() {
 		this.cld = this.getClass().getClassLoader();
+		fm.setClassLoaderForTemplateLoading(cld, PREFIX);
+	}
+	
+	@Override
+	public void startBook(Path file, BookMeta meta) throws IOException {
+		this.file = file;
+		this.meta = meta;
+		
 		tempDir = Files.createTempDirectory("epub");
+		
+		Path tempDirMeta = Paths.get(tempDir.toString(), "META-INF");
+		Files.createDirectories(tempDirMeta);
+		Path container = Paths.get(tempDirMeta.toString(), "container.xml");
+		Files.copy(cld.getResourceAsStream(PREFIX + "/container.xml"), container);
+
+		tempDirOEBPS = Paths.get(tempDir.toString(), "OEBPS");		
+		Files.createDirectories(tempDirOEBPS);
 	}
 
 	@Override
-	public void writeCover() {
-		//
+	public void writeCover() throws IOException  {
+		Path cover = Paths.get(tempDirOEBPS.toString(), "cover.xhtml");
+		try (BufferedWriter bw = 
+				Files.newBufferedWriter(cover, StandardOpenOption.CREATE, StandardOpenOption.WRITE)) {
+			Template tmpl = fm.getTemplate("cover.ftl");
+			tmpl.process(meta, bw);
+		} catch (TemplateException ex) {
+			LOG.debug("Could not writer cover page");
+			throw new IOException(ex);
+		}
 	}
 
 	@Override
@@ -87,10 +119,16 @@ public class Epub3Writer implements BookWriter {
 			
 			ZipEntry zeMime = new ZipEntry("mime-type");
 			zip.putNextEntry(zeMime);
-			cld.getResourceAsStream(PREFIX + "/mime-type");
+			InputStream is = cld.getResourceAsStream(PREFIX + "/mime-type");
 			zip.closeEntry();
 			
-			
+			Path[] paths = Files.walk(tempDirOEBPS).toArray(Path[]::new);
+			for (Path p : paths) {
+				ZipEntry ze = new ZipEntry("OEBPS/" + p.toFile().getName());
+				InputStream ois = Files.newInputStream(p, StandardOpenOption.READ);
+				zip.putNextEntry(ze);
+				zip.closeEntry();
+			}
 		} catch (IOException ex) {
 			LOG.error("Could not write eBook", ex);
 		}

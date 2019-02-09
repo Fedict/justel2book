@@ -25,7 +25,7 @@
  */
 package be.fedict.justel2book;
 
-import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
 
 /**
@@ -38,12 +38,12 @@ public interface BookWriter {
 	 * 
 	 * @param file
 	 */
-	public void startBook(Path file, BookMeta meta) throws Exception;
+	public void startBook(Path file, BookMeta meta) throws IOException;
 	
-	public void writeCover();
-	public void writePreface();
-	public void writeTOC();
-	public void writeContent();
+	public void writeCover() throws IOException;
+	public void writePreface() throws IOException;
+	public void writeTOC() throws IOException;
+	public void writeContent() throws IOException;
 	
-	public void endBook() throws Exception;
+	public void endBook() throws IOException;
 }

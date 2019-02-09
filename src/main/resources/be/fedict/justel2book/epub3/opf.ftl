@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <package version="3.0" unique-identifier="pub-id" 
 		xmlns="http://www.idpf.org/2007/opf"
-		xmlns:dc="http://purl.org/dc/elements/1.1/"
+		xmlns:dc="http://purl.org/dc/elements/1.1/">
 	<metadata>
 		<dc:title xml:lang="${meta.lang}>${meta.title}</dc:title>
 		<dc:language>${meta.lang}</dc:language>
