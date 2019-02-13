@@ -4,7 +4,7 @@
   <groupId>be.fedict</groupId>
   <artifactId>justel2book</artifactId>
   <name>Justel 2 Book</name>
-  <version>2.5-SNAPSHOT</version>
+  <version>1.0-SNAPSHOT</version>
   <description>Convert Justel HTML to ePub</description>
   <build>
     <plugins>
@@ -17,6 +17,7 @@
               <goal>shade</goal>
             </goals>
             <configuration>
+              <transformer />
               <transformer />
               <transformers>
                 <transformer>

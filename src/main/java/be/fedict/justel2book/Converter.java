@@ -75,7 +75,13 @@ public class Converter {
 		LOG.info("Loading {}", f);
 		doc = Jsoup.parse(f, StandardCharsets.ISO_8859_1.name());
 	}
-	
+
+	/**
+	 * Save HTML document to a local file
+	 * 
+	 * @param f file name
+	 * @throws IOException 
+	 */
 	public void save(File f) throws IOException {
 		LOG.info("Saving doc to {}", f);
 		Files.write(f.toPath(), 
@@ -83,6 +89,11 @@ public class Converter {
 					StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE);
 	}
 	
+	/**
+	 * Get meta from HTML page
+	 * 
+	 * @return 
+	 */
 	public BookMeta getMeta() {
 		doc.body().select("table:first-child td[colspan=5]");
 		return new BookMeta();

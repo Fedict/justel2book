@@ -31,19 +31,50 @@ import java.nio.file.Path;
 /**
  * Generic interface for writing ebook
  * 
- * @author Bart.Hanssens
+ * @author Bart Hanssens
  */
 public interface BookWriter {
 	/**
+	 * Start book creation
 	 * 
-	 * @param file
+	 * @param file result file
+	 * @param meta meta data
+	 * @throws java.io.IOException
 	 */
 	public void startBook(Path file, BookMeta meta) throws IOException;
 	
+	/**
+	 * Write cover
+	 * 
+	 * @throws IOException 
+	 */
 	public void writeCover() throws IOException;
+	
+	/**
+	 * Write preface
+	 * 
+	 * @throws IOException 
+	 */
 	public void writePreface() throws IOException;
+	
+	/**
+	 * Write Table of Contents
+	 * 
+	 * @throws IOException 
+	 */
 	public void writeTOC() throws IOException;
+	
+	/**
+	 * Write content
+	 * 
+	 * @throws IOException 
+	 */
 	public void writeContent() throws IOException;
 	
+	/**
+	 * End book creation
+	 * 
+	 * @throws IOException 
+	 */
 	public void endBook() throws IOException;
 }

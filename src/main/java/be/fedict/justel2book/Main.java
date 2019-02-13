@@ -64,8 +64,8 @@ public class Main {
 	/**
 	 * Parse command line arguments
 	 * 
-	 * @param args
-	 * @return 
+	 * @param args arguments
+	 * @return parsed command line
 	 */
 	private static CommandLine parse(String[] args) {
 		CommandLineParser cli = new DefaultParser();
@@ -89,6 +89,7 @@ public class Main {
 			System.exit(-1);
 		}
 
+		// get parameters from command line
 		File cfg = new File(cli.getOptionValue("c"));
 		if (! (cfg.exists() && cfg.isFile() && cfg.canRead())) {
 			LOG.error("Cannot read config file {}", cfg);
@@ -117,6 +118,7 @@ public class Main {
 			}
 		}
 
+		// conversion starts here
 		Converter conv = new Converter();		
 		try {
 			if (f == null) {

@@ -29,7 +29,8 @@ import java.net.URL;
 import java.time.LocalDate;
 
 /**
- *
+ * Book metadata helper class
+ * 
  * @author Bart Hanssens
  */
 public class BookMeta {
@@ -38,79 +39,113 @@ public class BookMeta {
 	private String language;
 	private LocalDate genDate;
 	private LocalDate pubDate;
-	private LocalDate pubNumber;
-	private LocalDate pubPage;
-	private LocalDate fromDate;
 	private URL eli;
 
+	/**
+	 * Get book title
+	 * 
+	 * @return title
+	 */
 	public String getTitle() {
 		return title;
 	}
 
+	/**
+	 * Set book title
+	 * 
+	 * @param title title
+	 */
 	public void setTitle(String title) {
 		this.title = title;
 	}
 
+	/**
+	 * Get description
+	 * 
+	 * @return text 
+	 */
 	public String getDescription() {
 		return description;
 	}
-
+	
+	/**
+	 * Set description
+	 * 
+	 * @param description 
+	 */
 	public void setDescription(String description) {
 		this.description = description;
 	}
 
+	/**
+	 * Get ISO language code
+	 * 
+	 * @return language code 
+	 */
 	public String getLanguage() {
 		return language;
 	}
-
+	
+	/**
+	 * Set ISO language code
+	 * 
+	 * @param language code 
+	 */
 	public void setLanguage(String language) {
 		this.language = language;
 	}
 
+	/**
+	 * Get book generation data
+	 * 
+	 * @return date 
+	 */
 	public LocalDate getGenDate() {
 		return genDate;
 	}
-
+	
+	/**
+	 * Set book generation date
+	 * 
+	 * @param genDate date 
+	 */
 	public void setGenDate(LocalDate genDate) {
 		this.genDate = genDate;
 	}
 
+	/**
+	 * Set publication date
+	 * 
+	 * @return publication date
+	 */
 	public LocalDate getPubDate() {
 		return pubDate;
 	}
 
+	/**
+	 * Set publication date
+	 * 
+	 * @param pubDate publication date
+	 */
 	public void setPubDate(LocalDate pubDate) {
 		this.pubDate = pubDate;
 	}
 
-	public LocalDate getPubNumber() {
-		return pubNumber;
-	}
 
-	public void setPubNumber(LocalDate pubNumber) {
-		this.pubNumber = pubNumber;
-	}
-
-	public LocalDate getPubPage() {
-		return pubPage;
-	}
-
-	public void setPubPage(LocalDate pubPage) {
-		this.pubPage = pubPage;
-	}
-
-	public LocalDate getFromDate() {
-		return fromDate;
-	}
-
-	public void setFromDate(LocalDate fromDate) {
-		this.fromDate = fromDate;
-	}
-
+	/**
+	 * Get European Legislation Identifier
+	 * 
+	 * @return URI
+	 */
 	public URL getEli() {
 		return eli;
 	}
 
+	/**
+	 * Set European Legislation Identifieri
+	 * 
+	 * @param eli URI 
+	 */
 	public void setEli(URL eli) {
 		this.eli = eli;
 	}

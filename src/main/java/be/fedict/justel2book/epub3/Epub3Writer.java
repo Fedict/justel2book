@@ -47,7 +47,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * Write ePUB3 book
+ * 
  * @author Bart Hanssens
  */
 public class Epub3Writer implements BookWriter {
@@ -73,13 +74,14 @@ public class Epub3Writer implements BookWriter {
 		this.file = file;
 		this.meta = meta;
 		
+		// metadata directory
 		tempDir = Files.createTempDirectory("epub");
-		
 		Path tempDirMeta = Paths.get(tempDir.toString(), "META-INF");
 		Files.createDirectories(tempDirMeta);
 		Path container = Paths.get(tempDirMeta.toString(), "container.xml");
 		Files.copy(cld.getResourceAsStream(PREFIX + "/container.xml"), container);
-
+		
+		// content directory
 		tempDirOEBPS = Paths.get(tempDir.toString(), "OEBPS");		
 		Files.createDirectories(tempDirOEBPS);
 	}
