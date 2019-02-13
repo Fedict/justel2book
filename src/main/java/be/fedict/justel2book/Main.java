@@ -125,12 +125,13 @@ public class Main {
 				conv.fetch(props.getProperty("justel2book.url"), 
 							props.getProperty("justel2book.proxy.host"), 
 							Integer.getInteger(props.getProperty("justel2book.proxy.port"), 0));
-				conv.save(new File(dir, "out.html"));
+				conv.saveLocal(new File(dir, "out.html"));
 			} else {
 				conv.fetch(f);
 			}
 		} catch (IOException ioe) {
-			LOG.error("Could not download HTML page", ioe.getMessage());
+			LOG.error("Could not download or import HTML page", ioe.getMessage());
 		}
+		conv.getMeta();
 	}
 }

@@ -82,7 +82,7 @@ public class Converter {
 	 * @param f file name
 	 * @throws IOException 
 	 */
-	public void save(File f) throws IOException {
+	public void saveLocal(File f) throws IOException {
 		LOG.info("Saving doc to {}", f);
 		Files.write(f.toPath(), 
 					doc.outerHtml().getBytes(StandardCharsets.ISO_8859_1), 
