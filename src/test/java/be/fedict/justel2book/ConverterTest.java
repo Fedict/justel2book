@@ -74,5 +74,7 @@ public class ConverterTest {
 	@Test
 	void getMeta() throws IOException {
 		BookMeta meta = conv.getMeta();
+		System.err.println(meta.getEli());
+		System.err.println(meta.getTitle());
 	}
 }

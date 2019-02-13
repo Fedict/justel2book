@@ -28,13 +28,17 @@ package be.fedict.justel2book;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.MalformedURLException;
 import java.net.Proxy;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,6 +50,8 @@ import org.slf4j.LoggerFactory;
  */
 public class Converter {
 	private final static Logger LOG = LoggerFactory.getLogger(Converter.class);
+	
+	private final static String ELI_PREFIX = "http://www.ejustice.just.fgov.be/eli";
 	
 	private Document doc;
 	
@@ -89,13 +95,36 @@ public class Converter {
 					StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE);
 	}
 	
+	
+	private URL getMetaTitle(Document doc) {
+		URL url = null;
+		Elements els = doc.body().select("table:first-of-type tr td[colspan='5']");
+		
+		for (Element el: els) {
+			if (el.hasText()) {
+				String eli = el.text().trim();
+				if (eli.startsWith(ELI_PREFIX)) {
+					try {
+						url = new URL(eli);
+					} catch (MalformedURLException ex) {
+						LOG.error("Invalid ELI {}", eli);
+					}
+				}
+			}
+		}
+		return url;
+	}
+
 	/**
 	 * Get meta from HTML page
 	 * 
 	 * @return 
 	 */
 	public BookMeta getMeta() {
-		doc.body().select("table:first-child td[colspan=5]");
+		BookMeta meta = new BookMeta();
+	
+		meta.setEli(getMetaTitle(doc));
+	
 		return new BookMeta();
 	}
 }
