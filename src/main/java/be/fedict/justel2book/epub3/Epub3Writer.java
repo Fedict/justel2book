@@ -47,9 +47,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Write ePUB3 book
+ * Write ePUB3 book.
+ * This creates a temp directory to generate the metadata and all the XHTML5 files, then ZIP it.
  * 
- * @author Bart Hanssens
+1 * @author Bart Hanssens
  */
 public class Epub3Writer implements BookWriter {
 	private final static Logger LOG = LoggerFactory.getLogger(Epub3Writer.class);
@@ -64,6 +65,9 @@ public class Epub3Writer implements BookWriter {
 	private Path file;
 	private BookMeta meta;
 	
+	/**
+	 * Constructor
+	 */
 	public Epub3Writer() {
 		this.cld = this.getClass().getClassLoader();
 		fm.setClassLoaderForTemplateLoading(cld, PREFIX);
