@@ -39,6 +39,7 @@ public class BookMeta {
 	private String language;
 	private LocalDate genDate;
 	private LocalDate pubDate;
+	private LocalDate fromDate;
 	private URL eli;
 
 	/**
@@ -131,6 +132,23 @@ public class BookMeta {
 		this.pubDate = pubDate;
 	}
 
+	/**
+	 * Set from date
+	 * 
+	 * @return from date
+	 */
+	public LocalDate getFromDate() {
+		return pubDate;
+	}
+
+	/**
+	 * Set valid from date
+	 * 
+	 * @param fromDate start date
+	 */
+	public void setFromDate(LocalDate fromDate) {
+		this.fromDate = fromDate;
+	}
 
 	/**
 	 * Get European Legislation Identifier
@@ -142,7 +160,7 @@ public class BookMeta {
 	}
 
 	/**
-	 * Set European Legislation Identifieri
+	 * Set European Legislation Identifier
 	 * 
 	 * @param eli URI 
 	 */

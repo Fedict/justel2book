@@ -132,6 +132,10 @@ public class Main {
 		} catch (IOException ioe) {
 			LOG.error("Could not download or import HTML page", ioe.getMessage());
 		}
-		conv.getMeta();
+		try {
+			conv.getMeta();
+		} catch (IOException ioe) {
+			LOG.error("Could not convert metadata", ioe.getMessage());
+		}
 	}
 }

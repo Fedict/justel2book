@@ -34,6 +34,9 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -51,6 +54,7 @@ import org.slf4j.LoggerFactory;
 public class Converter {
 	private final static Logger LOG = LoggerFactory.getLogger(Converter.class);
 	
+	private final static DateTimeFormatter REV_ISO = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 	private final static String ELI_PREFIX = "http://www.ejustice.just.fgov.be/eli";
 	
 	private Document doc;
@@ -96,7 +100,51 @@ public class Converter {
 	}
 	
 	
-	private URL getMetaTitle(Document doc) {
+	private void setMetaDates(BookMeta meta, Document doc) throws IOException {
+		Element table = doc.body().select("a[name='titre'] ~ table:first-of-type").first();
+		if (table == null) {
+			throw new IOException("Head table not found");
+		}
+
+		Elements rows = table.select("tr");
+		if (rows.isEmpty()) {
+			throw new IOException("No head rows found");
+		}
+		if (!rows.get(1).text().trim().equals("Titel")) {
+			throw new IOException("Wrong table, expected title table");
+		}
+
+		Elements fonts = rows.select("font[color='red']");
+		for (Element font: fonts) {
+			if (font.hasText()) {
+				String txt = font.text().trim();
+				if (txt.equals("Publicatie :")) {
+					String d = font.nextSibling().toString().trim();
+					try {
+						meta.setPubDate(LocalDate.parse(d, REV_ISO));
+					} catch (DateTimeParseException dtpe) {
+						LOG.error("Could not parse publication date {}", d);
+					}
+				} else if (txt.equals("Inwerkingtreding :")) {
+					String d = font.nextSibling().toString().trim();
+					try {
+						meta.setFromDate(LocalDate.parse(d, REV_ISO));
+					} catch (DateTimeParseException dtpe) {
+						LOG.error("Could not parse from date {}", d);
+					}
+				}
+			}
+		}
+		
+	}
+	
+	/**
+	 * Set ELI from HTML table
+	 * 
+	 * @param doc HTML document
+	 * @return ELI or null
+	 */
+	private void setMetaEli(BookMeta meta, Document doc) throws IOException {
 		URL url = null;
 		Elements els = doc.body().select("table:first-of-type tr td[colspan='5']");
 		
@@ -112,7 +160,10 @@ public class Converter {
 				}
 			}
 		}
-		return url;
+		if (url == null) {
+			throw new IOException("No ELI found");
+		}
+		meta.setEli(url);
 	}
 
 	/**
@@ -120,10 +171,11 @@ public class Converter {
 	 * 
 	 * @return 
 	 */
-	public BookMeta getMeta() {
+	public BookMeta getMeta() throws IOException {
 		BookMeta meta = new BookMeta();
 	
-		meta.setEli(getMetaTitle(doc));
+		setMetaEli(meta, doc);
+		setMetaDates(meta, doc);
 	
 		return new BookMeta();
 	}
