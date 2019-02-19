@@ -36,6 +36,7 @@ import java.io.BufferedWriter;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -126,12 +127,14 @@ public class Epub3Writer implements BookWriter {
 			ZipEntry zeMime = new ZipEntry("mime-type");
 			zip.putNextEntry(zeMime);
 			InputStream is = cld.getResourceAsStream(PREFIX + "/mime-type");
+			copyIO(is, fos);
 			zip.closeEntry();
 			
 			Path[] paths = Files.walk(tempDirOEBPS).toArray(Path[]::new);
 			for (Path p : paths) {
 				ZipEntry ze = new ZipEntry("OEBPS/" + p.toFile().getName());
 				InputStream ois = Files.newInputStream(p, StandardOpenOption.READ);
+				copyIO(ois, fos);
 				zip.putNextEntry(ze);
 				zip.closeEntry();
 			}
@@ -152,4 +155,11 @@ public class Epub3Writer implements BookWriter {
 		}
 	}
 
+	private void copyIO(InputStream is, OutputStream os) throws IOException {
+		byte[] buf = new byte[16384];
+
+        for (int len; (len= is.read(buf)) != -1; ){
+            os.write(buf, 0, len);
+        }
+	}
 }

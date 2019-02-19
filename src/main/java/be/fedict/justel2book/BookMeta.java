@@ -138,7 +138,7 @@ public class BookMeta {
 	 * @return from date
 	 */
 	public LocalDate getFromDate() {
-		return pubDate;
+		return fromDate;
 	}
 
 	/**

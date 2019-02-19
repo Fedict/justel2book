@@ -177,6 +177,6 @@ public class Converter {
 		setMetaEli(meta, doc);
 		setMetaDates(meta, doc);
 	
-		return new BookMeta();
+		return meta;
 	}
 }
