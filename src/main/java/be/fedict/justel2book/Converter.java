@@ -100,6 +100,13 @@ public class Converter {
 	}
 	
 	
+	/**
+	 * Set publication and other dates from HTML document
+	 * 
+	 * @param meta meta object to populate
+	 * @param doc HTML document to parse
+	 * @throws IOException 
+	 */
 	private void setMetaDates(BookMeta meta, Document doc) throws IOException {
 		Element table = doc.body().select("a[name='titre'] ~ table:first-of-type").first();
 		if (table == null) {
@@ -139,7 +146,7 @@ public class Converter {
 	}
 	
 	/**
-	 * Set ELI from HTML table
+	 * Set ELI from HTML document
 	 * 
 	 * @param doc HTML document
 	 * @return ELI or null
