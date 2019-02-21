@@ -28,9 +28,11 @@ package be.fedict.justel2book;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -38,6 +40,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.platform.runner.JUnitPlatform;
 import org.junit.runner.RunWith;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  *
@@ -72,8 +76,12 @@ public class ConverterTest {
 	}
 	
 	@Test
-	void getMeta() throws IOException {
+	void testMeta() throws IOException {
 		BookMeta meta = conv.getMeta();
+
+		assertEquals(new URL("http://www.ejustice.just.fgov.be/eli/wet/1867/06/08/1867060850/justel"), meta.getEli());
+		assertEquals(LocalDate.of(1867, 6, 9), meta.getPubDate());
+		assertEquals(LocalDate.of(1867, 10, 15), meta.getFromDate());
 		
 		System.err.println(meta.getEli());
 		System.err.println(meta.getPubDate());
