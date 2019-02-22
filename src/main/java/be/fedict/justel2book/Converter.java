@@ -41,6 +41,8 @@ import java.time.format.DateTimeParseException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
+import org.jsoup.nodes.TextNode;
 import org.jsoup.select.Elements;
 
 import org.slf4j.Logger;
@@ -176,14 +178,70 @@ public class Converter {
 	/**
 	 * Get meta from HTML page
 	 * 
-	 * @return 
+	 * @return meta elements 
+	 * @throws IOException 
 	 */
 	public BookMeta getMeta() throws IOException {
 		BookMeta meta = new BookMeta();
-	
 		setMetaEli(meta, doc);
 		setMetaDates(meta, doc);
 	
 		return meta;
+	}
+
+	/**
+	 * Set table fo contents from HTML document
+	 * 
+	 * @param meta ToC object to populate
+	 * @param doc HTML document to parse
+	 * @throws IOException 
+	 */
+	private void setTOC(BookTOC toc, Document doc) throws IOException {
+		Element table = doc.body().select("a[name='tablematiere'] ~ table:first-of-type").first();
+		if (table == null) {
+			throw new IOException("TOC table not found");
+		}
+
+		Elements rows = table.select("tr");
+		if (rows.isEmpty()) {
+			throw new IOException("No head rows found");
+		}
+		if (!rows.get(1).text().trim().equals("Inhoudstafel")) {
+			throw new IOException("Wrong table, expected TOC table");
+		}
+
+		Elements links = rows.select("tr th[colspan='3'] a");
+		for (Element link: links) {
+			if (link.hasText()) {
+				String href = link.attr("href");
+				String prefix = link.text().trim();
+				
+				Node node = link.nextSibling();
+				if (node instanceof TextNode) {
+					String title = ((TextNode) node).text().trim();
+LOG.debug("{} - {} - {}", href, prefix, title);
+					toc.add(href, prefix, title);
+				} else {
+					throw new IOException("Expected text node in " + prefix);
+				}
+			} else {
+				LOG.warn("Skipping link without text");
+			}
+		}
+		
+	}
+
+	
+	/**
+	 * Get table of contents from HTML page
+	 * 
+	 * @return TOC object
+	 * @throws IOException
+	 */
+	public BookTOC getTOC() throws IOException {
+		BookTOC toc = new BookTOC();
+		setTOC(toc, doc);
+		
+		return toc;
 	}
 }

@@ -134,6 +134,7 @@ public class Main {
 		}
 		try {
 			conv.getMeta();
+			conv.getTOC();
 		} catch (IOException ioe) {
 			LOG.error("Could not convert metadata", ioe.getMessage());
 		}

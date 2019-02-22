@@ -82,10 +82,10 @@ public class ConverterTest {
 		assertEquals(new URL("http://www.ejustice.just.fgov.be/eli/wet/1867/06/08/1867060850/justel"), meta.getEli());
 		assertEquals(LocalDate.of(1867, 6, 9), meta.getPubDate());
 		assertEquals(LocalDate.of(1867, 10, 15), meta.getFromDate());
-		
-		System.err.println(meta.getEli());
-		System.err.println(meta.getPubDate());
-		System.err.println(meta.getFromDate());
-		System.err.println(meta.getTitle());
+	}
+	
+	@Test
+	void testTOC() throws IOException {
+		BookTOC toc = conv.getTOC();
 	}
 }
