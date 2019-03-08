@@ -25,31 +25,34 @@
  */
 package be.fedict.justel2book.epub3;
 
-import be.fedict.justel2book.BookMeta;
+import be.fedict.justel2book.dao.BookMeta;
 import be.fedict.justel2book.BookWriter;
+import be.fedict.justel2book.dao.Book;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 
 import java.io.BufferedWriter;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
+import java.net.URI;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Write ePUB3 book.
- * This creates a temp directory to generate the metadata and all the XHTML5 files, then ZIP it.
+ * This creates a temp directory to generate the metadata and all the XHTML5 files, then ZIPs it.
  * 
 1 * @author Bart Hanssens
  */
@@ -64,7 +67,7 @@ public class Epub3Writer implements BookWriter {
 	private Path tempDirOEBPS;
 	
 	private Path file;
-	private BookMeta meta;
+	private Book book;
 	
 	/**
 	 * Constructor
@@ -75,10 +78,7 @@ public class Epub3Writer implements BookWriter {
 	}
 	
 	@Override
-	public void startBook(Path file, BookMeta meta) throws IOException {
-		this.file = file;
-		this.meta = meta;
-		
+	public void startBook() throws IOException {
 		// metadata directory
 		tempDir = Files.createTempDirectory("epub");
 		Path tempDirMeta = Paths.get(tempDir.toString(), "META-INF");
@@ -97,7 +97,7 @@ public class Epub3Writer implements BookWriter {
 		try (BufferedWriter bw = 
 				Files.newBufferedWriter(cover, StandardOpenOption.CREATE, StandardOpenOption.WRITE)) {
 			Template tmpl = fm.getTemplate("cover.ftl");
-			tmpl.process(meta, bw);
+			tmpl.process(book.getMeta(), bw);
 		} catch (TemplateException ex) {
 			LOG.debug("Could not writer cover page");
 			throw new IOException(ex);
@@ -121,6 +121,40 @@ public class Epub3Writer implements BookWriter {
 
 	@Override
 	public void endBook() {
+		Map<String, String> env = new HashMap<>(); 
+        env.put("create", "true");
+        URI uri = URI.create("jar:file:" + file.toFile());
+        
+		try (FileSystem zipfs = FileSystems.newFileSystem(uri, env)) {
+			InputStream is = cld.getResourceAsStream(PREFIX + "/mime-type");
+            Files.copy(is, zipfs.getPath("/mime-type"), StandardCopyOption.REPLACE_EXISTING);
+
+			Path[] paths = Files.walk(tempDirOEBPS).toArray(Path[]::new);
+			for (Path p : paths) {
+				Files.copy(p, zipfs.getPath("/OEBPS/" + p.toFile().getName()), 
+													StandardCopyOption.REPLACE_EXISTING);
+			}
+		} catch (IOException ex) {
+			LOG.error("Could not write eBook", ex);
+		}
+	}
+	
+	public void write(Path file, Book book) throws IOException {
+		this.file = file;
+		this.book = book;
+		
+		try {
+			startBook();
+			writePreface();
+			writeTOC();
+			writeContent();
+			endBook();
+		} catch (IOException ioe) {
+			cleanup();
+		}
+	}
+
+	/*   
 		try (	FileOutputStream fos = new FileOutputStream(file.toFile());
 				ZipOutputStream zip = new ZipOutputStream(fos)) {
 			
@@ -144,6 +178,9 @@ public class Epub3Writer implements BookWriter {
 		cleanup();
 	}
 
+	/**
+	 * Remove temporary files
+	 */
 	private void cleanup() {
 		if (tempDir != null) {
 			try {
@@ -155,11 +192,18 @@ public class Epub3Writer implements BookWriter {
 		}
 	}
 
-	private void copyIO(InputStream is, OutputStream os) throws IOException {
+	/**
+	 * Copy data from one stream to another
+	 * 
+	 * @param is input stream
+	 * @param os output stream
+	 * @throws IOException 
+	 */
+	/*private void copyIO(InputStream is, OutputStream os) throws IOException {
 		byte[] buf = new byte[16384];
 
         for (int len; (len= is.read(buf)) != -1; ){
             os.write(buf, 0, len);
         }
-	}
+	}*/
 }

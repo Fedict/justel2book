@@ -23,62 +23,71 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package be.fedict.justel2book;
+package be.fedict.justel2book.dao;
 
-import be.fedict.justel2book.dao.Book;
-import be.fedict.justel2book.dao.BookMeta;
-import java.io.IOException;
-import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Generic interface for writing ebook
+ * Book table of contents helper class
  * 
  * @author Bart Hanssens
  */
-public interface BookWriter {
-	public void write(Path file, Book book) throws IOException;
+public class BookTOC {
+	/**
+	 * TOC entry helper class
+	 */
+	public class Entry {
+		private final String href;
+		private final String prefix;
+		private final String title;
+		
+		public String getHref() {
+			return href;
+		}
+
+		public String getPrefix() {
+			return prefix;
+		}
+
+		public String getTitle() {
+			return title;
+		}
+
+		/**
+		 * Constructor
+		 * 
+		 * @param href HTML href
+		 * @param prefix title prefix
+		 * @param title TOC entry title
+		 */
+		public Entry(String href, String prefix, String title) {
+			this.href = href;
+			this.prefix = prefix;
+			this.title = title;
+		}
+	}
+	
+	private final List<BookTOC.Entry> toc = new ArrayList();
+	
 
 	/**
-	 * Start book creation
+	 * Get full ToC
 	 * 
-	 * @param file result file
-	 * @param meta meta data
-	 * @throws java.io.IOException
+	 * @return map with ToC
 	 */
-	public void startBook() throws IOException;
-	
+	public List<BookTOC.Entry> getTOC() {
+		return toc;
+	}
+
 	/**
-	 * Write cover
+	 * Add an entry to the ToC
 	 * 
-	 * @throws IOException 
+	 * @param href HTML reference
+	 * @param prefix title prefix
+	 * @param title name of the entry 
 	 */
-	public void writeCover() throws IOException;
-	
-	/**
-	 * Write preface
-	 * 
-	 * @throws IOException 
-	 */
-	public void writePreface() throws IOException;
-	
-	/**
-	 * Write Table of Contents
-	 * 
-	 * @throws IOException 
-	 */
-	public void writeTOC() throws IOException;
-	
-	/**
-	 * Write content
-	 * 
-	 * @throws IOException 
-	 */
-	public void writeContent() throws IOException;
-	
-	/**
-	 * End book creation
-	 * 
-	 * @throws IOException 
-	 */
-	public void endBook() throws IOException;
+	public void add(String href, String prefix, String title) {
+		toc.add(new Entry(href, prefix, title));
+	}
 }

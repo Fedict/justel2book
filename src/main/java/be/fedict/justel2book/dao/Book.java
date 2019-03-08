@@ -23,71 +23,53 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package be.fedict.justel2book;
+package be.fedict.justel2book.dao;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.net.URL;
+import java.time.LocalDate;
 
 /**
- * Book table of contents helper class
+ * Book helper class
  * 
  * @author Bart Hanssens
  */
-public class BookTOC {
-	/**
-	 * TOC entry helper class
-	 */
-	public class Entry {
-		private final String href;
-		private final String prefix;
-		private final String title;
-		
-		public String getHref() {
-			return href;
-		}
-
-		public String getPrefix() {
-			return prefix;
-		}
-
-		public String getTitle() {
-			return title;
-		}
-
-		/**
-		 * Constructor
-		 * 
-		 * @param href HTML href
-		 * @param prefix title prefix
-		 * @param title TOC entry title
-		 */
-		public Entry(String href, String prefix, String title) {
-			this.href = href;
-			this.prefix = prefix;
-			this.title = title;
-		}
-	}
-	
-	private final List<BookTOC.Entry> toc = new ArrayList();
-	
+public class Book {
+	private BookMeta meta;
+	private BookTOC toc;
 
 	/**
-	 * Get full ToC
+	 * Get meta data
 	 * 
-	 * @return map with ToC
+	 * @return title
 	 */
-	public List<BookTOC.Entry> getTOC() {
+	public BookMeta getMeta() {
+		return meta;
+	}
+
+	/**
+	 * Set book meta data
+	 * 
+	 * @param meta meta data
+	 */
+	public void setMeta(BookMeta meta) {
+		this.meta = meta;
+	}
+
+	/**
+	 * Get table of contents
+	 * 
+	 * @return table of contents
+	 */
+	public BookTOC getTOC() {
 		return toc;
 	}
-
+	
 	/**
-	 * Add an entry to the ToC
+	 * Set table of contents
 	 * 
-	 * @param href HTML reference
-	 * @param prefix title prefix
-	 * @param title name of the entry 
+	 * @param toc table of contents 
 	 */
-	public void add(String href, String prefix, String title) {
-		toc.add(new Entry(href, prefix, title));
+	public void setTOC(BookTOC toc) {
+		this.toc = toc;
 	}
 }

@@ -25,6 +25,8 @@
  */
 package be.fedict.justel2book;
 
+import be.fedict.justel2book.dao.BookTOC;
+import be.fedict.justel2book.dao.BookMeta;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -55,7 +57,7 @@ public class ConverterTest {
 	static Path tmpdir;
 	
 	private static File infile;
-	private static Converter conv;
+	private static JustelReader conv;
 
 	@BeforeAll
 	static void getTestFile() throws IOException {
@@ -64,7 +66,7 @@ public class ConverterTest {
 			Files.copy(is, p);
 		}
 		infile = p.toFile();
-		conv = new Converter();
+		conv = new JustelReader();
 		conv.fetch(infile);
 	}
 	

@@ -25,9 +25,13 @@
  */
 package be.fedict.justel2book;
 
+import be.fedict.justel2book.dao.Book;
+import be.fedict.justel2book.epub3.Epub3Writer;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Properties;
 
 import org.apache.commons.cli.CommandLine;
@@ -52,7 +56,11 @@ public class Main {
 			.addOption("f", "file", true, "use local file")
 			.addRequiredOption("c", "config", true, "config file")
 			.addRequiredOption("o", "outdir", true, "output dir");
-
+	
+	private static File outdir;
+	private static File infile;
+	private static Properties props;
+	
 	/**
 	 * Print help info
 	 */
@@ -78,11 +86,43 @@ public class Main {
 	}
 	
 	/**
-	 * Main
+	 * Do the conversion from HTML to a model in memory
+	 * 
+	 * @return book or null
+	 */
+	private static Book readJustel() {
+		Book book = null;
+		JustelReader reader = new JustelReader();
+
+		try {
+			if (infile == null) {
+				reader.fetch(props.getProperty("justel2book.url"), 
+							props.getProperty("justel2book.proxy.host"), 
+							Integer.getInteger(props.getProperty("justel2book.proxy.port"), 0));
+				reader.saveLocal(new File(outdir, "out.html"));
+			} else {
+				reader.fetch(infile);
+			}
+		} catch (IOException ioe) {
+			LOG.error("Could not download or import HTML page", ioe.getMessage());
+		}
+
+		try {
+			book = new Book();
+			book.setMeta(reader.getMeta());
+			book.setTOC(reader.getTOC());
+		} catch (IOException ioe) {
+			LOG.error("Could not convert metadata", ioe.getMessage());
+		}
+		return book;
+	}
+	
+	/**
+	 * Check parameters
 	 * 
 	 * @param args 
 	 */
-	public static void main(String args[]) {
+	private static void checkParams(String args[]) {
 		CommandLine cli  = parse(args);
 		if (cli == null) {
 			LOG.error("Cannot parse command line");
@@ -96,13 +136,14 @@ public class Main {
 			System.exit(-2);
 		}
 		
-		File dir = new File(cli.getOptionValue("o"));
-		if (! (dir.exists() && dir.isDirectory() && dir.canWrite()) || dir.mkdirs()) {
-			LOG.error("Cannot write to output directory {}", dir);
+		// output for downloaded file
+		outdir = new File(cli.getOptionValue("o"));
+		if (! (outdir.exists() && outdir.isDirectory() && outdir.canWrite()) || outdir.mkdirs()) {
+			LOG.error("Cannot write to output directory {}", outdir);
 			System.exit(-3);
 		} 
 		
-		Properties props = new Properties();
+		props = new Properties();
 		try {
 			props.load(Files.newInputStream(cfg.toPath()));
 		} catch (IOException ex) {
@@ -110,33 +151,34 @@ public class Main {
 			System.exit(-4);
 		}
 
-		File f = cli.hasOption("f") ? new File(cli.getOptionValue("f")) : null;
-		if (f != null) {
-			if (! (f.exists() && f.isFile() && f.canRead())) {
-				LOG.error("Cannot read input file {}", f);
+		// use a local file instead of downloading it
+		infile = cli.hasOption("f") ? new File(cli.getOptionValue("f")) : null;
+		if (infile != null) {
+			if (! (infile.exists() && infile.isFile() && infile.canRead())) {
+				LOG.error("Cannot read input file {}", infile);
 				System.exit(-5);
 			}
 		}
-
-		// conversion starts here
-		Converter conv = new Converter();		
+	}
+	
+	/**
+	 * Main
+	 * 
+	 * @param args 
+	 */
+	public static void main(String args[]) {
+		checkParams(args);
+		
+		Book book = readJustel();
+		
+		Path outfile = Paths.get(outdir.toString(), "book.epub");
 		try {
-			if (f == null) {
-				conv.fetch(props.getProperty("justel2book.url"), 
-							props.getProperty("justel2book.proxy.host"), 
-							Integer.getInteger(props.getProperty("justel2book.proxy.port"), 0));
-				conv.saveLocal(new File(dir, "out.html"));
-			} else {
-				conv.fetch(f);
-			}
+			BookWriter writer = new Epub3Writer();
+			writer.write(outfile, book);
 		} catch (IOException ioe) {
-			LOG.error("Could not download or import HTML page", ioe.getMessage());
+			LOG.error("Could not write epub", ioe);
+			System.exit(-6);
 		}
-		try {
-			conv.getMeta();
-			conv.getTOC();
-		} catch (IOException ioe) {
-			LOG.error("Could not convert metadata", ioe.getMessage());
-		}
+		
 	}
 }

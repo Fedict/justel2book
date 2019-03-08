@@ -25,6 +25,8 @@
  */
 package be.fedict.justel2book;
 
+import be.fedict.justel2book.dao.BookTOC;
+import be.fedict.justel2book.dao.BookMeta;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -37,6 +39,7 @@ import java.nio.file.StandardOpenOption;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import org.jsoup.HttpStatusException;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -53,8 +56,8 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Bart Hanssens
  */
-public class Converter {
-	private final static Logger LOG = LoggerFactory.getLogger(Converter.class);
+public class JustelReader {
+	private final static Logger LOG = LoggerFactory.getLogger(JustelReader.class);
 	
 	private final static DateTimeFormatter REV_ISO = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 	private final static String ELI_PREFIX = "http://www.ejustice.just.fgov.be/eli";
@@ -74,7 +77,8 @@ public class Converter {
 							? Proxy.NO_PROXY 
 							: new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort));
 		LOG.info("Getting {}", url);
-		doc = Jsoup.connect(url).proxy(proxy).timeout(30_000).userAgent("Justel2eBook").get();
+		doc = Jsoup.connect(url).ignoreHttpErrors(true).proxy(proxy).timeout(30_000)
+								.userAgent("Justel2eBook").get();
 	}
 	
 	/**
@@ -97,8 +101,8 @@ public class Converter {
 	public void saveLocal(File f) throws IOException {
 		LOG.info("Saving doc to {}", f);
 		Files.write(f.toPath(), 
-					doc.outerHtml().getBytes(StandardCharsets.ISO_8859_1), 
-					StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE);
+				doc.outerHtml().getBytes(StandardCharsets.ISO_8859_1), 
+				StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE);
 	}
 	
 	
