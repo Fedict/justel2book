@@ -25,27 +25,28 @@
  */
 package be.fedict.justel2book.epub3;
 
-import be.fedict.justel2book.dao.BookMeta;
 import be.fedict.justel2book.BookWriter;
 import be.fedict.justel2book.dao.Book;
+import be.fedict.justel2book.dao.BookMeta;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 
 import java.io.BufferedWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,7 +60,7 @@ import org.slf4j.LoggerFactory;
 public class Epub3Writer implements BookWriter {
 	private final static Logger LOG = LoggerFactory.getLogger(Epub3Writer.class);
 	
-	private final static String PREFIX = "/be/fedict/justel2book/epub3";
+	private final static String PREFIX = "be/fedict/justel2book/epub3";
 	private final ClassLoader cld;
 	private final Configuration fm = new Configuration(Configuration.VERSION_2_3_28);
 	
@@ -99,7 +100,7 @@ public class Epub3Writer implements BookWriter {
 			Template tmpl = fm.getTemplate("cover.ftl");
 			tmpl.process(book.getMeta(), bw);
 		} catch (TemplateException ex) {
-			LOG.debug("Could not writer cover page");
+			LOG.error("Could not writer cover page");
 			throw new IOException(ex);
 		}
 	}
@@ -110,8 +111,17 @@ public class Epub3Writer implements BookWriter {
 	}
 
 	@Override
-	public void writeTOC() {
-		//
+	public void writeTOC() throws IOException {
+		Path cover = Paths.get(tempDirOEBPS.toString(), "cover.xhtml");
+		try (BufferedWriter bw = 
+				Files.newBufferedWriter(cover, StandardOpenOption.CREATE, StandardOpenOption.WRITE)) {
+			Template tmpl = fm.getTemplate("navigation.ftl");
+			Map<String, BookMeta> meta = Collections.singletonMap("meta", book.getMeta());
+			tmpl.process(meta, bw);
+		} catch (TemplateException ex) {
+			LOG.error("Could not writer TOC");
+			throw new IOException(ex);
+		}
 	}
 
 	@Override
@@ -120,19 +130,27 @@ public class Epub3Writer implements BookWriter {
 	}
 
 	@Override
-	public void endBook() {
-		Map<String, String> env = new HashMap<>(); 
-        env.put("create", "true");
-        URI uri = URI.create("jar:file:" + file.toFile());
-        
-		try (FileSystem zipfs = FileSystems.newFileSystem(uri, env)) {
-			InputStream is = cld.getResourceAsStream(PREFIX + "/mime-type");
-            Files.copy(is, zipfs.getPath("/mime-type"), StandardCopyOption.REPLACE_EXISTING);
+	public void endBook() throws IOException {
+		try (	FileOutputStream fos = new FileOutputStream(file.toFile());
+				ZipOutputStream zip = new ZipOutputStream(fos)) {
 
-			Path[] paths = Files.walk(tempDirOEBPS).toArray(Path[]::new);
+			ZipEntry zeMime = new ZipEntry("mime-type");
+			zip.putNextEntry(zeMime);
+			try (InputStream is = cld.getResourceAsStream(PREFIX + "/mime-type")) {
+				LOG.info("Write {}", zeMime.getName());
+				copyIO(is, zip);
+			}
+			zip.closeEntry();
+			
+			Path[] paths = Files.walk(tempDirOEBPS).filter(Files::isRegularFile).toArray(Path[]::new);
 			for (Path p : paths) {
-				Files.copy(p, zipfs.getPath("/OEBPS/" + p.toFile().getName()), 
-													StandardCopyOption.REPLACE_EXISTING);
+				ZipEntry ze = new ZipEntry("OEBPS/" + p.toFile().getName());
+				zip.putNextEntry(ze);
+				try (InputStream ois = Files.newInputStream(p, StandardOpenOption.READ)) {
+					LOG.info("Write {}", ze.getName());
+					copyIO(ois, zip);
+				}
+				zip.closeEntry();
 			}
 		} catch (IOException ex) {
 			LOG.error("Could not write eBook", ex);
@@ -142,40 +160,18 @@ public class Epub3Writer implements BookWriter {
 	public void write(Path file, Book book) throws IOException {
 		this.file = file;
 		this.book = book;
+		LOG.info("Write EPUB to {}", file);
 		
 		try {
 			startBook();
+			writeCover();
 			writePreface();
 			writeTOC();
 			writeContent();
 			endBook();
-		} catch (IOException ioe) {
+		} finally {
 			cleanup();
 		}
-	}
-
-	/*   
-		try (	FileOutputStream fos = new FileOutputStream(file.toFile());
-				ZipOutputStream zip = new ZipOutputStream(fos)) {
-			
-			ZipEntry zeMime = new ZipEntry("mime-type");
-			zip.putNextEntry(zeMime);
-			InputStream is = cld.getResourceAsStream(PREFIX + "/mime-type");
-			copyIO(is, fos);
-			zip.closeEntry();
-			
-			Path[] paths = Files.walk(tempDirOEBPS).toArray(Path[]::new);
-			for (Path p : paths) {
-				ZipEntry ze = new ZipEntry("OEBPS/" + p.toFile().getName());
-				InputStream ois = Files.newInputStream(p, StandardOpenOption.READ);
-				copyIO(ois, fos);
-				zip.putNextEntry(ze);
-				zip.closeEntry();
-			}
-		} catch (IOException ex) {
-			LOG.error("Could not write eBook", ex);
-		}
-		cleanup();
 	}
 
 	/**
@@ -184,8 +180,11 @@ public class Epub3Writer implements BookWriter {
 	private void cleanup() {
 		if (tempDir != null) {
 			try {
-				Files.walk(tempDir).forEach(f -> f.toFile().delete());
-				Files.delete(tempDir);
+				for(Path p : Files.walk(tempDir)
+							.sorted((a, b) -> b.compareTo(a))
+							.toArray(Path[]::new)) {
+					Files.delete(p);
+				}
 			} catch (IOException ioe) {
 				LOG.error("Could not delete (part of) temp dir", ioe);
 			}
@@ -199,11 +198,11 @@ public class Epub3Writer implements BookWriter {
 	 * @param os output stream
 	 * @throws IOException 
 	 */
-	/*private void copyIO(InputStream is, OutputStream os) throws IOException {
+	private void copyIO(InputStream is, OutputStream os) throws IOException {
 		byte[] buf = new byte[16384];
 
         for (int len; (len= is.read(buf)) != -1; ){
             os.write(buf, 0, len);
         }
-	}*/
+	}
 }
