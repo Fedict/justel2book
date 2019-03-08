@@ -76,7 +76,7 @@ public class BookTOC {
 	 * 
 	 * @return map with ToC
 	 */
-	public List getTOC() {
+	public List<BookTOC.Entry> getTOC() {
 		return toc;
 	}
 

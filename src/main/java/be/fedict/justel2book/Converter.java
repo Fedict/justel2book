@@ -106,10 +106,9 @@ public class Converter {
 	 * Set publication and other dates from HTML document
 	 * 
 	 * @param meta meta object to populate
-	 * @param doc HTML document to parse
 	 * @throws IOException 
 	 */
-	private void setMetaDates(BookMeta meta, Document doc) throws IOException {
+	private void setMetaDates(BookMeta meta) throws IOException {
 		Element table = doc.body().select("a[name='titre'] ~ table:first-of-type").first();
 		if (table == null) {
 			throw new IOException("Head table not found");
@@ -150,10 +149,10 @@ public class Converter {
 	/**
 	 * Set ELI from HTML document
 	 * 
-	 * @param doc HTML document
-	 * @return ELI or null
+	 * @param meta
+	 * @throws IOException
 	 */
-	private void setMetaEli(BookMeta meta, Document doc) throws IOException {
+	private void setMetaEli(BookMeta meta) throws IOException {
 		URL url = null;
 		Elements els = doc.body().select("table:first-of-type tr td[colspan='5']");
 		
@@ -183,55 +182,58 @@ public class Converter {
 	 */
 	public BookMeta getMeta() throws IOException {
 		BookMeta meta = new BookMeta();
-		setMetaEli(meta, doc);
-		setMetaDates(meta, doc);
+		setMetaEli(meta);
+		setMetaDates(meta);
 	
 		return meta;
 	}
 
 	/**
-	 * Set table fo contents from HTML document
+	 * Set table of contents from HTML document
 	 * 
-	 * @param meta ToC object to populate
-	 * @param doc HTML document to parse
+	 * @param toc ToC object to populate
 	 * @throws IOException 
 	 */
-	private void setTOC(BookTOC toc, Document doc) throws IOException {
-		Element table = doc.body().select("a[name='tablematiere'] ~ table:first-of-type").first();
+	private void setTOC(BookTOC toc) throws IOException {
+		Element table = doc.body().select("a[name='tablematiere'] ~ table").first();
 		if (table == null) {
 			throw new IOException("TOC table not found");
 		}
 
 		Elements rows = table.select("tr");
-		if (rows.isEmpty()) {
-			throw new IOException("No head rows found");
+		if (rows == null || rows.isEmpty()) {
+			throw new IOException("No rows found");
 		}
-		if (!rows.get(1).text().trim().equals("Inhoudstafel")) {
+
+		Element header = rows.get(0).selectFirst("th");
+		if (header == null || !header.wholeText().trim().equals("Inhoudstafel")){
 			throw new IOException("Wrong table, expected TOC table");
 		}
 
-		Elements links = rows.select("tr th[colspan='3'] a");
+		Elements links = rows.select("tr th[colspan='3'] a[href^='#LNK']");
 		for (Element link: links) {
 			if (link.hasText()) {
 				String href = link.attr("href");
 				String prefix = link.text().trim();
+				String title = "";
 				
-				Node node = link.nextSibling();
-				if (node instanceof TextNode) {
-					String title = ((TextNode) node).text().trim();
-LOG.debug("{} - {} - {}", href, prefix, title);
-					toc.add(href, prefix, title);
-				} else {
-					throw new IOException("Expected text node in " + prefix);
+				Node sibl = link.nextSibling();
+				while (sibl != null && !(sibl instanceof Element && ((Element) sibl).is("a[href^='#LNK']"))) {
+					if (sibl instanceof TextNode) {
+						title += " " + ((TextNode) sibl).text().trim();
+					}
+					sibl = sibl.nextSibling();
 				}
+				if (title.startsWith(" - ")) {
+					title = title.substring(3);
+				}
+				toc.add(href, prefix, title);
 			} else {
 				LOG.warn("Skipping link without text");
 			}
 		}
-		
 	}
 
-	
 	/**
 	 * Get table of contents from HTML page
 	 * 
@@ -240,8 +242,7 @@ LOG.debug("{} - {} - {}", href, prefix, title);
 	 */
 	public BookTOC getTOC() throws IOException {
 		BookTOC toc = new BookTOC();
-		setTOC(toc, doc);
-		
+		setTOC(toc);
 		return toc;
 	}
 }

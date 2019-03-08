@@ -87,5 +87,7 @@ public class ConverterTest {
 	@Test
 	void testTOC() throws IOException {
 		BookTOC toc = conv.getTOC();
+		
+		assertEquals(toc.getTOC().size(), 164);
 	}
 }
