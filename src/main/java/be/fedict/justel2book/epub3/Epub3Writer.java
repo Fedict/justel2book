@@ -28,7 +28,6 @@ package be.fedict.justel2book.epub3;
 import be.fedict.justel2book.BookWriter;
 import be.fedict.justel2book.dao.Book;
 import be.fedict.justel2book.dao.BookMeta;
-import be.fedict.justel2book.dao.BookTOC;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -45,7 +44,6 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -94,8 +92,18 @@ public class Epub3Writer implements BookWriter {
 		Files.createDirectories(tempDirOEBPS);
 	}
 
+	/**
+	 * Write a simple part of the EPUB file
+	 * 
+	 * @param partfile name of the file
+	 * @param template template name
+	 * @param name display name
+	 * @param map variables for the template
+	 * @throws IOException 
+	 */
 	private void writePart(String partfile, String template, String name, Map map) throws IOException {
 		Path part = Paths.get(tempDirOEBPS.toString(), partfile);
+
 		try (BufferedWriter bw = 
 				Files.newBufferedWriter(part, StandardOpenOption.CREATE, StandardOpenOption.WRITE)) {
 			Template tmpl = fm.getTemplate(template);
@@ -106,7 +114,12 @@ public class Epub3Writer implements BookWriter {
 		}
 	}
 	
-	public void writePackage() throws IOException  {
+	/**
+	 * Write EPUB package info
+	 * 
+	 * @throws IOException 
+	 */
+	private void writePackage() throws IOException  {
 		Map<String,Object> map = new HashMap<>();
 		map.put("meta", Collections.singletonMap("meta", book.getMeta()));
 		map.put("toc", Collections.singletonMap("entries", book.getTOC().getTOC()));
@@ -134,7 +147,8 @@ public class Epub3Writer implements BookWriter {
 
 	@Override
 	public void writeContent() {
-		//	
+		Map<String,Object> map = new HashMap<>();
+
 	}
 
 	@Override
@@ -165,6 +179,7 @@ public class Epub3Writer implements BookWriter {
 		}
 	}
 	
+	@Override
 	public void write(Path file, Book book) throws IOException {
 		this.file = file;
 		this.book = book;

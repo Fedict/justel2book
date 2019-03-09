@@ -25,6 +25,7 @@
  */
 package be.fedict.justel2book;
 
+import be.fedict.justel2book.dao.BookContent;
 import be.fedict.justel2book.dao.BookTOC;
 import be.fedict.justel2book.dao.BookMeta;
 import java.io.File;
@@ -39,7 +40,6 @@ import java.nio.file.StandardOpenOption;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import org.jsoup.HttpStatusException;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -248,5 +248,64 @@ public class JustelReader {
 		BookTOC toc = new BookTOC();
 		setTOC(toc);
 		return toc;
+	}
+	
+
+	/**
+	 * Set content from HTML document
+	 * 
+	 * @param content content object to populate
+	 * @throws IOException 
+	 */
+	private void setContent(BookContent content) throws IOException {
+		Element table = doc.body().select("a[name='tablematiere'] ~ table").first();
+		if (table == null) {
+			throw new IOException("Content table not found");
+		}
+
+		Elements rows = table.select("tr");
+		if (rows == null || rows.isEmpty()) {
+			throw new IOException("No rows found");
+		}
+
+		Element header = rows.get(0).selectFirst("th");
+		if (header == null || !header.wholeText().trim().equals("Tekst")){
+			throw new IOException("Wrong table, expected content table");
+		}
+
+		Elements links = rows.select("tr th[colspan='3'] a[href^='#LNK']");
+		for (Element link: links) {
+			if (link.hasText()) {
+				String href = link.attr("href");
+				String prefix = link.text().trim();
+				String title = "";
+				
+				Node sibl = link.nextSibling();
+				while (sibl != null && !(sibl instanceof Element && ((Element) sibl).is("a[href^='#LNK']"))) {
+					if (sibl instanceof TextNode) {
+						title += " " + ((TextNode) sibl).text().trim();
+					}
+					sibl = sibl.nextSibling();
+				}
+				if (title.startsWith(" - ")) {
+					title = title.substring(3);
+				}
+				content.add(href, prefix, title, text);
+			} else {
+				LOG.warn("Skipping link without text");
+			}
+		}
+	}
+
+
+	/**
+	* 
+	* @return
+	* @throws IOException 
+	*/
+	public BookContent getContent() throws IOException {
+		BookContent content = new BookContent());
+		setContent(content);
+		return content;
 	}
 }

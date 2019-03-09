@@ -29,18 +29,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Book table of contents helper class
+ * Book content helper class
  * 
  * @author Bart Hanssens
  */
-public class BookTOC {
+public class BookContent {
 	/**
-	 * TOC entry helper class
+	 * Content entry helper class
 	 */
 	public class Entry {
 		private final String href;
 		private final String prefix;
 		private final String title;
+		private final String text;
 		
 		/**
 		 * Get link reference
@@ -74,35 +75,37 @@ public class BookTOC {
 		 * 
 		 * @param href HTML href
 		 * @param prefix title prefix
-		 * @param title TOC entry title
+		 * @param title entry title
+		 * @param text text
 		 */
-		public Entry(String href, String prefix, String title) {
+		public Entry(String href, String prefix, String title, String text) {
 			this.href = href;
 			this.prefix = prefix;
 			this.title = title;
+			this.text = text;
 		}
 	}
 	
-	private final List<BookTOC.Entry> toc = new ArrayList();
+	private final List<BookContent.Entry> content = new ArrayList();
 	
 
 	/**
-	 * Get full ToC
+	 * Get full content
 	 * 
-	 * @return list with ToC
+	 * @return list of content parts
 	 */
-	public List<BookTOC.Entry> getTOC() {
-		return toc;
+	public List<BookContent.Entry> getContent() {
+		return content;
 	}
 
 	/**
-	 * Add an entry to the ToC
+	 * Add an entry to the contents
 	 * 
 	 * @param href HTML reference
 	 * @param prefix title prefix
 	 * @param title name of the entry 
 	 */
-	public void add(String href, String prefix, String title) {
-		toc.add(new Entry(href, prefix, title));
+	public void add(String href, String prefix, String title, String text) {
+		content.add(new Entry(href, prefix, title, text));
 	}
 }
