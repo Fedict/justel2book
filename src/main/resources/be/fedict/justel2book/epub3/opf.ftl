@@ -3,22 +3,26 @@
 		xmlns="http://www.idpf.org/2007/opf"
 		xmlns:dc="http://purl.org/dc/elements/1.1/">
 	<metadata>
-		<dc:title xml:lang="${meta.lang}>${meta.title}</dc:title>
-		<dc:language>${meta.lang}</dc:language>
-		<dc:date>${meta.now}</dc:date>
+		<dc:title xml:lang="${meta.lang!''}>${meta.title!''}</dc:title>
+		<dc:language>${meta.lang!""}</dc:language>
+		<dc:date>${meta.now!""}</dc:date>
 	</metadata>
 	<manifest>
 		<item id="toc" properties="nav" href="toc.xhtml" media-type="application/xhtml+xml"/>
 		<item id="cover" href="cover.xhtml" media-type="application/xhtml+xml"/>
-		<#list chapters as c>
-		<item id="${c.id}" href="${c.file}" media-type="application/xhtml+xml"/>
+		<#if toc.entries??>
+		<#list toc.entries as c>
+		<item id="${c.id!''}" href="${c.href!''}" media-type="application/xhtml+xml"/>
 		</#list>
+		</#if>
 	</manifest>
 	<spine>
 		<itemref idref="cover" properties="page-spread-right" />
 		<itemref idref="toc" />
-		<#list chapters as c>
-		<itemref idref="${c.id}" />
+		<#if toc.entries??>
+		<#list toc.entries as c>
+		<itemref idref="${c.id!''}" />
 		</#list>
+		</#if>
 	</spine>
 </package>

@@ -41,8 +41,6 @@ public interface BookWriter {
 	/**
 	 * Start book creation
 	 * 
-	 * @param file result file
-	 * @param meta meta data
 	 * @throws java.io.IOException
 	 */
 	public void startBook() throws IOException;

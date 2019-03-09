@@ -28,6 +28,7 @@ package be.fedict.justel2book.epub3;
 import be.fedict.justel2book.BookWriter;
 import be.fedict.justel2book.dao.Book;
 import be.fedict.justel2book.dao.BookMeta;
+import be.fedict.justel2book.dao.BookTOC;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -44,6 +45,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -92,17 +94,29 @@ public class Epub3Writer implements BookWriter {
 		Files.createDirectories(tempDirOEBPS);
 	}
 
-	@Override
-	public void writeCover() throws IOException  {
-		Path cover = Paths.get(tempDirOEBPS.toString(), "cover.xhtml");
+	private void writePart(String partfile, String template, String name, Map map) throws IOException {
+		Path part = Paths.get(tempDirOEBPS.toString(), partfile);
 		try (BufferedWriter bw = 
-				Files.newBufferedWriter(cover, StandardOpenOption.CREATE, StandardOpenOption.WRITE)) {
-			Template tmpl = fm.getTemplate("cover.ftl");
-			tmpl.process(book.getMeta(), bw);
+				Files.newBufferedWriter(part, StandardOpenOption.CREATE, StandardOpenOption.WRITE)) {
+			Template tmpl = fm.getTemplate(template);
+			tmpl.process(map, bw);
 		} catch (TemplateException ex) {
-			LOG.error("Could not writer cover page");
+			LOG.error("Could not write {}", name);
 			throw new IOException(ex);
 		}
+	}
+	
+	public void writePackage() throws IOException  {
+		Map<String,Object> map = new HashMap<>();
+		map.put("meta", Collections.singletonMap("meta", book.getMeta()));
+		map.put("toc", Collections.singletonMap("entries", book.getTOC().getTOC()));
+		writePart("content.opf", "opf.ftl", "package", map);
+	}
+
+	@Override
+	public void writeCover() throws IOException  {
+		Map<String, BookMeta> meta = Collections.singletonMap("meta", book.getMeta());
+		writePart("cover.xhtml", "cover.ftl", "cover", meta);
 	}
 
 	@Override
@@ -112,16 +126,10 @@ public class Epub3Writer implements BookWriter {
 
 	@Override
 	public void writeTOC() throws IOException {
-		Path cover = Paths.get(tempDirOEBPS.toString(), "cover.xhtml");
-		try (BufferedWriter bw = 
-				Files.newBufferedWriter(cover, StandardOpenOption.CREATE, StandardOpenOption.WRITE)) {
-			Template tmpl = fm.getTemplate("navigation.ftl");
-			Map<String, BookMeta> meta = Collections.singletonMap("meta", book.getMeta());
-			tmpl.process(meta, bw);
-		} catch (TemplateException ex) {
-			LOG.error("Could not writer TOC");
-			throw new IOException(ex);
-		}
+		Map<String,Object> map = new HashMap<>();
+		map.put("meta", Collections.singletonMap("meta", book.getMeta()));
+		map.put("toc", Collections.singletonMap("entries", book.getTOC().getTOC()));
+		writePart("toc.xhtml", "navigation.ftl", "ToC", map);
 	}
 
 	@Override
@@ -164,6 +172,7 @@ public class Epub3Writer implements BookWriter {
 		
 		try {
 			startBook();
+			writePackage();
 			writeCover();
 			writePreface();
 			writeTOC();
