@@ -164,15 +164,17 @@ public class Epub3Writer implements BookWriter {
 		try (	FileOutputStream fos = new FileOutputStream(file.toFile());
 				ZipOutputStream zip = new ZipOutputStream(fos)) {
 
-			ZipEntry zeMime = new ZipEntry("mime-type");
+			ZipEntry zeMime = new ZipEntry("mimetype");
+			zip.setMethod(ZipOutputStream.STORED);
 			zip.putNextEntry(zeMime);
-			try (InputStream is = cld.getResourceAsStream(PREFIX + "/mime-type")) {
+			try (InputStream is = cld.getResourceAsStream(PREFIX + "/mimetype")) {
 				LOG.info("Write {}", zeMime.getName());
 				copyIO(is, zip);
 			}
 			zip.closeEntry();
 			
 			ZipEntry zeContainer = new ZipEntry("META-INF/container.xml");
+			zip.setMethod(ZipOutputStream.DEFLATED);
 			zip.putNextEntry(zeContainer);
 			Path m = Paths.get(tempDirMeta.toString(), "container.xml");
 			try (InputStream mis = Files.newInputStream(m, StandardOpenOption.READ)) {

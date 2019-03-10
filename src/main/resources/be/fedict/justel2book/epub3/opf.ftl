@@ -3,7 +3,7 @@
 		xmlns="http://www.idpf.org/2007/opf"
 		xmlns:dc="http://purl.org/dc/elements/1.1/">
 	<metadata>
-		<dc:title xml:lang="${meta.lang!''}>${meta.title!''}</dc:title>
+		<dc:title xml:lang="${meta.lang!''}">${meta.title!''}</dc:title>
 		<dc:language>${meta.lang!""}</dc:language>
 		<dc:date>${meta.now!""}</dc:date>
 	</metadata>
