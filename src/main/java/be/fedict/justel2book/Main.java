@@ -111,6 +111,7 @@ public class Main {
 			book = new Book();
 			book.setMeta(reader.getMeta());
 			book.setTOC(reader.getTOC());
+			book.setContent(reader.getContent());
 		} catch (IOException ioe) {
 			LOG.error("Could not convert metadata", ioe.getMessage());
 		}

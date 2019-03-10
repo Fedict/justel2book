@@ -39,6 +39,7 @@ public class BookContent {
 	 */
 	public class Entry {
 		private final String href;
+		private final String prefix;
 		private final String text;
 		
 		/**
@@ -51,13 +52,24 @@ public class BookContent {
 		}
 
 		/**
+		 * Get prefix
+		 * 
+		 * @return prefix
+		 */
+		public String getPrefix() {
+			return prefix;
+		}
+		
+		/**
 		 * Constructor
 		 * 
 		 * @param href HTML href
+		 * @param prefix prefix
 		 * @param text text
 		 */
-		public Entry(String href, String text) {
+		public Entry(String href, String prefix, String text) {
 			this.href = href;
+			this.prefix = prefix;
 			this.text = text;
 		}
 	}
@@ -77,9 +89,10 @@ public class BookContent {
 	 * Add an entry to the contents
 	 * 
 	 * @param href HTML reference
-	 * @param text
+	 * @param prefix prefix
+	 * @param text text of the content
 	 */
-	public void add(String href, String text) {
-		content.add(new Entry(href, text));
+	public void add(String href, String prefix, String text) {
+		content.add(new Entry(href, prefix, text));
 	}
 }

@@ -258,7 +258,7 @@ public class JustelReader {
 	 * @throws IOException 
 	 */
 	private void setContent(BookContent content) throws IOException {
-		Element table = doc.body().select("a[name='tablematiere'] ~ table").first();
+		Element table = doc.body().select("a[name='texte'] ~ table").first();
 		if (table == null) {
 			throw new IOException("Content table not found");
 		}
@@ -273,10 +273,13 @@ public class JustelReader {
 			throw new IOException("Wrong table, expected content table");
 		}
 
-		Elements parts = rows.select("tr th[colspan='3'] a[href^='#LNK']");
+		Elements parts = rows.select("tr th[colspan='3'] a[name^='LNK']");
+		System.err.println(parts.size());
 		for (Element part: parts) {
+		System.err.println(part);			
 			if (part.hasText()) {
 				String href = part.attr("href");
+				String prefix = part.text().trim();
 				StringBuilder builder  = new StringBuilder(2048);
 				
 				Node sibl = part.nextSibling();
@@ -290,7 +293,7 @@ public class JustelReader {
 					sibl = sibl.nextSibling();
 				}
 				
-				content.add(href, builder.toString());
+				content.add(href, prefix, builder.toString());
 			} else {
 				LOG.warn("Skipping content without text");
 			}
@@ -299,10 +302,10 @@ public class JustelReader {
 
 
 	/**
-	* 
-	* @return
-	* @throws IOException 
-	*/
+	 * 
+	 * @return
+	  * @throws IOException 
+	 */
 	public BookContent getContent() throws IOException {
 		BookContent content = new BookContent();
 		setContent(content);
