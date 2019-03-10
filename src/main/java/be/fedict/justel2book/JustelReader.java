@@ -274,11 +274,9 @@ public class JustelReader {
 		}
 
 		Elements parts = rows.select("tr th[colspan='3'] a[name^='LNK']");
-		System.err.println(parts.size());
-		for (Element part: parts) {
-		System.err.println(part);			
+		for (Element part: parts) {			
 			if (part.hasText()) {
-				String href = part.attr("href");
+				String href = part.attr("name");
 				String prefix = part.text().trim();
 				StringBuilder builder  = new StringBuilder(2048);
 				
@@ -292,7 +290,6 @@ public class JustelReader {
 					}
 					sibl = sibl.nextSibling();
 				}
-				
 				content.add(href, prefix, builder.toString());
 			} else {
 				LOG.warn("Skipping content without text");
