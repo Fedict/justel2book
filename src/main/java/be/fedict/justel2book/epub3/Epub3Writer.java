@@ -66,6 +66,7 @@ public class Epub3Writer implements BookWriter {
 	private final Configuration fm = new Configuration(Configuration.VERSION_2_3_28);
 	
 	private Path tempDir;
+	private Path tempDirMeta;
 	private Path tempDirOEBPS;
 	
 	private Path file;
@@ -83,7 +84,7 @@ public class Epub3Writer implements BookWriter {
 	public void startBook() throws IOException {
 		// metadata directory
 		tempDir = Files.createTempDirectory("epub");
-		Path tempDirMeta = Paths.get(tempDir.toString(), "META-INF");
+		tempDirMeta = Paths.get(tempDir.toString(), "META-INF");
 		Files.createDirectories(tempDirMeta);
 		Path container = Paths.get(tempDirMeta.toString(), "container.xml");
 		Files.copy(cld.getResourceAsStream(PREFIX + "/container.xml"), container);
@@ -149,9 +150,11 @@ public class Epub3Writer implements BookWriter {
 	@Override
 	public void writeContent() throws IOException {
 		BookContent content = book.getContent();
+		BookMeta meta =	 book.getMeta();
 		for (BookContent.Entry entry: content.getContent()) {
 			Map<String,Object> map = new HashMap<>();
 			map.put("content", entry);
+			map.put("meta", Collections.singletonMap("meta", meta));
 			writePart("content-" + entry.getHref() + ".xhtml", "content.ftl", "content", map);			
 		}
 	}
@@ -169,6 +172,15 @@ public class Epub3Writer implements BookWriter {
 			}
 			zip.closeEntry();
 			
+			ZipEntry zeContainer = new ZipEntry("META-INF/container.xml");
+			zip.putNextEntry(zeContainer);
+			Path m = Paths.get(tempDirMeta.toString(), "container.xml");
+			try (InputStream mis = Files.newInputStream(m, StandardOpenOption.READ)) {
+				LOG.info("Write {}", zeContainer.getName());
+				copyIO(mis, zip);
+			}
+			zip.closeEntry();
+				
 			Path[] paths = Files.walk(tempDirOEBPS).filter(Files::isRegularFile).toArray(Path[]::new);
 			for (Path p : paths) {
 				ZipEntry ze = new ZipEntry("OEBPS/" + p.toFile().getName());

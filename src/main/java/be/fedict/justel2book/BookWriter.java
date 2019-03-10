@@ -26,7 +26,7 @@
 package be.fedict.justel2book;
 
 import be.fedict.justel2book.dao.Book;
-import be.fedict.justel2book.dao.BookMeta;
+
 import java.io.IOException;
 import java.nio.file.Path;
 
@@ -36,6 +36,12 @@ import java.nio.file.Path;
  * @author Bart Hanssens
  */
 public interface BookWriter {
+	/**
+	 *
+	 * @param file
+	 * @param book
+	 * @throws IOException
+	 */
 	public void write(Path file, Book book) throws IOException;
 
 	/**

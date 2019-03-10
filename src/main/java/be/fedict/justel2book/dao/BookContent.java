@@ -59,7 +59,16 @@ public class BookContent {
 		public String getPrefix() {
 			return prefix;
 		}
-		
+
+		/**
+		 * Get content text
+		 * 
+		 * @return text
+		 */
+		public String getText() {
+			return text;
+		}
+				
 		/**
 		 * Constructor
 		 * 

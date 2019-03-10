@@ -217,7 +217,7 @@ public class JustelReader {
 		Elements links = rows.select("tr th[colspan='3'] a[href^='#LNK']");
 		for (Element link: links) {
 			if (link.hasText()) {
-				String href = link.attr("href");
+				String href = link.attr("href").substring(1); // remove #		
 				String prefix = link.text().trim();
 				String title = "";
 				

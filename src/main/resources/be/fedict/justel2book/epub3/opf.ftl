@@ -12,7 +12,7 @@
 		<item id="cover" href="cover.xhtml" media-type="application/xhtml+xml"/>
 		<#if toc.entries??>
 		<#list toc.entries as c>
-		<item id="${c.id!''}" href="${c.href!''}" media-type="application/xhtml+xml"/>
+		<item id="${c.href!''}" href="content-${c.href!''}.xhtml" media-type="application/xhtml+xml"/>
 		</#list>
 		</#if>
 	</manifest>
@@ -21,8 +21,12 @@
 		<itemref idref="toc" />
 		<#if toc.entries??>
 		<#list toc.entries as c>
-		<itemref idref="${c.id!''}" />
+		<itemref idref="${c.href!''}" />
 		</#list>
 		</#if>
 	</spine>
+	<guide>
+		<reference type="cover" title="Cover" href="cover.xhtml"/>
+		<reference type="toc" title="toc.xhtml"/>
+		</guide>
 </package>
