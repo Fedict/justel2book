@@ -25,8 +25,4 @@
 		</#list>
 		</#if>
 	</spine>
-	<guide>
-		<reference type="cover" title="Cover" href="cover.xhtml"/>
-		<reference type="toc" title="toc.xhtml"/>
-		</guide>
 </package>

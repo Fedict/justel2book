@@ -46,6 +46,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.zip.Deflater;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -166,15 +167,18 @@ public class Epub3Writer implements BookWriter {
 
 			ZipEntry zeMime = new ZipEntry("mimetype");
 			zip.setMethod(ZipOutputStream.STORED);
+			zip.setLevel(Deflater.NO_COMPRESSION);
+			zeMime.setSize(20);
+			zeMime.setCompressedSize(20);
+			zeMime.setCrc(0x2cab616f);
 			zip.putNextEntry(zeMime);
-			try (InputStream is = cld.getResourceAsStream(PREFIX + "/mimetype")) {
-				LOG.info("Write {}", zeMime.getName());
-				copyIO(is, zip);
-			}
+			zip.write("application/epub+zip".getBytes());
+			LOG.info("Write {}", zeMime.getName());
 			zip.closeEntry();
 			
 			ZipEntry zeContainer = new ZipEntry("META-INF/container.xml");
 			zip.setMethod(ZipOutputStream.DEFLATED);
+			zip.setLevel(Deflater.DEFAULT_COMPRESSION);
 			zip.putNextEntry(zeContainer);
 			Path m = Paths.get(tempDirMeta.toString(), "container.xml");
 			try (InputStream mis = Files.newInputStream(m, StandardOpenOption.READ)) {
