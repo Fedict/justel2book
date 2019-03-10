@@ -25,9 +25,6 @@
  */
 package be.fedict.justel2book.dao;
 
-import java.net.URL;
-import java.time.LocalDate;
-
 /**
  * Book helper class
  * 
@@ -36,6 +33,7 @@ import java.time.LocalDate;
 public class Book {
 	private BookMeta meta;
 	private BookTOC toc;
+	private BookContent content;
 
 	/**
 	 * Get meta data
@@ -71,5 +69,23 @@ public class Book {
 	 */
 	public void setTOC(BookTOC toc) {
 		this.toc = toc;
+	}
+	
+	/**
+	 * Get content
+	 * 
+	 * @return content
+	 */
+	public BookContent getContent() {
+		return content;
+	}
+	
+	/**
+	 * Set contents
+	 * 
+	 * @param content content
+	 */
+	public void setContent(BookContent content) {
+		this.content = content;
 	}
 }

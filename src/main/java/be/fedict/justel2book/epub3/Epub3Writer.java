@@ -27,6 +27,7 @@ package be.fedict.justel2book.epub3;
 
 import be.fedict.justel2book.BookWriter;
 import be.fedict.justel2book.dao.Book;
+import be.fedict.justel2book.dao.BookContent;
 import be.fedict.justel2book.dao.BookMeta;
 
 import freemarker.template.Configuration;
@@ -146,9 +147,13 @@ public class Epub3Writer implements BookWriter {
 	}
 
 	@Override
-	public void writeContent() {
-		Map<String,Object> map = new HashMap<>();
-
+	public void writeContent() throws IOException {
+		BookContent content = book.getContent();
+		for (BookContent.Entry entry: content.getContent()) {
+			Map<String,Object> map = new HashMap<>();
+			map.put("content", entry);
+			writePart("content-" + entry.getHref() + ".xhtml", "content.ftl", "content", map);			
+		}
 	}
 
 	@Override

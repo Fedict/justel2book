@@ -39,8 +39,6 @@ public class BookContent {
 	 */
 	public class Entry {
 		private final String href;
-		private final String prefix;
-		private final String title;
 		private final String text;
 		
 		/**
@@ -53,42 +51,19 @@ public class BookContent {
 		}
 
 		/**
-		 * Get prefix
-		 * 
-		 * @return prefix
-		 */
-		public String getPrefix() {
-			return prefix;
-		}
-
-		/**
-		 * Get title
-		 * 
-		 * @return title
-		 */
-		public String getTitle() {
-			return title;
-		}
-
-		/**
 		 * Constructor
 		 * 
 		 * @param href HTML href
-		 * @param prefix title prefix
-		 * @param title entry title
 		 * @param text text
 		 */
-		public Entry(String href, String prefix, String title, String text) {
+		public Entry(String href, String text) {
 			this.href = href;
-			this.prefix = prefix;
-			this.title = title;
 			this.text = text;
 		}
 	}
 	
 	private final List<BookContent.Entry> content = new ArrayList();
 	
-
 	/**
 	 * Get full content
 	 * 
@@ -102,10 +77,9 @@ public class BookContent {
 	 * Add an entry to the contents
 	 * 
 	 * @param href HTML reference
-	 * @param prefix title prefix
-	 * @param title name of the entry 
+	 * @param text
 	 */
-	public void add(String href, String prefix, String title, String text) {
-		content.add(new Entry(href, prefix, title, text));
+	public void add(String href, String text) {
+		content.add(new Entry(href, text));
 	}
 }

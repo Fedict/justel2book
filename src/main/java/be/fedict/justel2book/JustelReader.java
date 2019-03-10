@@ -273,26 +273,26 @@ public class JustelReader {
 			throw new IOException("Wrong table, expected content table");
 		}
 
-		Elements links = rows.select("tr th[colspan='3'] a[href^='#LNK']");
-		for (Element link: links) {
-			if (link.hasText()) {
-				String href = link.attr("href");
-				String prefix = link.text().trim();
-				String title = "";
+		Elements parts = rows.select("tr th[colspan='3'] a[href^='#LNK']");
+		for (Element part: parts) {
+			if (part.hasText()) {
+				String href = part.attr("href");
+				StringBuilder builder  = new StringBuilder(2048);
 				
-				Node sibl = link.nextSibling();
+				Node sibl = part.nextSibling();
 				while (sibl != null && !(sibl instanceof Element && ((Element) sibl).is("a[href^='#LNK']"))) {
 					if (sibl instanceof TextNode) {
-						title += " " + ((TextNode) sibl).text().trim();
+						builder.append(((TextNode) sibl).text().trim());
+					}
+					if (sibl instanceof Element && ((Element) sibl).tagName().equals("br")) {
+						builder.append("\n");
 					}
 					sibl = sibl.nextSibling();
 				}
-				if (title.startsWith(" - ")) {
-					title = title.substring(3);
-				}
-				content.add(href, prefix, title, text);
+				
+				content.add(href, builder.toString());
 			} else {
-				LOG.warn("Skipping link without text");
+				LOG.warn("Skipping content without text");
 			}
 		}
 	}
@@ -304,7 +304,7 @@ public class JustelReader {
 	* @throws IOException 
 	*/
 	public BookContent getContent() throws IOException {
-		BookContent content = new BookContent());
+		BookContent content = new BookContent();
 		setContent(content);
 		return content;
 	}
