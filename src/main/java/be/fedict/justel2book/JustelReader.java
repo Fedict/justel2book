@@ -285,11 +285,16 @@ public class JustelReader {
 					if (sibl instanceof TextNode) {
 						builder.append(((TextNode) sibl).text().trim());
 					}
-					if (sibl instanceof Element && ((Element) sibl).tagName().equals("br")) {
-						builder.append("\n");
+					if (sibl instanceof Element) {
+						if (((Element) sibl).tagName().equals("br")) {
+							builder.append("<br/>");
+						} else {
+							builder.append(((Element) sibl).text());
+						}
 					}
 					sibl = sibl.nextSibling();
 				}
+				System.err.println(builder.toString());
 				content.add(href, prefix, builder.toString());
 			} else {
 				LOG.warn("Skipping content without text");

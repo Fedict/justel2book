@@ -12,7 +12,7 @@
 			<#if toc.entries??>
 			<#list toc.entries as c>
 			<li>
-				<a href="content-${c.href!""}.xhtml">${c.title?html}</a>
+				<a href="content-${c.href!""}.xhtml">${c.prefix?html}</a>${c.title?html}
 			</li>
 			</#list>
 			</#if>

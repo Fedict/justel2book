@@ -7,6 +7,7 @@
 </head>
 <body>
 <main>
+<h1>${content.prefix}</h1>
 <p>${content.text!""}</p>
 </main>
 </body>

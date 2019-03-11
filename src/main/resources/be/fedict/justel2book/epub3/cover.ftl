@@ -3,11 +3,11 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="${meta.language!''}">
 <head>
 	<meta charset="utf-8" />
-	<title>${meta.title!""}</title>
+	<title>Strafwetboek</title>
 </head>
 <body>
 <main>
-<h1>${meta.title!""}</h1>
+<h1>Strafwetboek</h1>
 </main>
 <footer>${meta.date!""}</footer>
 </body>
